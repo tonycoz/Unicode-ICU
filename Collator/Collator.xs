@@ -281,6 +281,18 @@ ucol_getLocale(col, type = ULOC_ACTUAL_LOCALE)
        }
 
 void
+ucol_setAttribute(col, attr, value)
+	Unicode::ICU::Collator col
+	int attr
+	int value
+    PREINIT:
+	UErrorCode status = U_ZERO_ERROR;
+    CODE:
+	ucol_setAttribute(col, attr, value, &status);
+	if (!U_SUCCESS(status))
+	    croak("Error setting attribute: %d", (int)status);
+
+void
 ucol_available(...)
     PREINIT:
 	int32_t count;
