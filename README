@@ -1,0 +1,3 @@
+The start of an XS interface to libicu.
+
+Currently only the collator interface has any code.
