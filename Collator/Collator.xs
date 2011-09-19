@@ -273,7 +273,7 @@ ucol_getLocale(col, type = ULOC_ACTUAL_LOCALE)
     PPCODE:
        name = ucol_getLocaleByType(col, type, &status);
        if (!U_SUCCESS(status)) {
-         croak("Error getting locale type: %d", status);
+         croak("Error getting locale type: %d", (int)status);
        }
        if (name) {
          EXTEND(SP, 1);
