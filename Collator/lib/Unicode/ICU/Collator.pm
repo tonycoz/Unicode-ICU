@@ -25,12 +25,12 @@ sub AUTOLOAD {
   my ($error, $val) = constant($constname);
   if ($error) {
     require Carp;
-    Carp::croak $error;
+    Carp::croak($error);
   }
 
   {
     no strict 'refs';
-    *AUTOLOAD = sub { $val };
+    *$AUTOLOAD = sub { $val };
   }
 
   goto &$AUTOLOAD;
