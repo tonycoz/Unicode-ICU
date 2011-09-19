@@ -119,6 +119,60 @@ uiter_setByteString(UCharIterator *c, char const *src, size_t len) {
   c->setState = byte_setState;
 }
 
+static void *
+malloc_temp(pTHX_ size_t size) {
+  SV *sv = sv_2mortal(newSV(size));
+
+  return SvPVX(sv);
+}
+
+static UChar *
+make_uchar(pTHX_ SV *sv, STRLEN *lenp) {
+  STRLEN len;
+  /* SvPV early to process any GMAGIC */
+  char const *pv = SvPV(sv, len);
+
+  if (SvUTF8(sv)) {
+    /* room for the characters and a bit for UTF-16 */
+    int32_t cap = sv_len_utf8(sv) * 10 / 8 + 5;
+    SV *result_sv = sv_2mortal(newSV(sizeof(UChar) * cap));
+    UChar *result = (UChar *)SvPVX(sv);
+    int32_t result_len;
+    UErrorCode status = U_ZERO_ERROR;
+
+    u_strFromUTF8(result, cap, &result_len, pv, len, &status);
+
+    if (status == U_BUFFER_OVERFLOW_ERROR) {
+      fprintf(stderr, "making more room cap %d rlen %d\n", (int)cap, (int)result_len);
+      /* need more room, repeat */
+      cap = result_len + 10;
+      SvGROW(result_sv, sizeof(UChar) * cap);
+      result = (UChar *)SvPVX(sv);
+      status = U_ZERO_ERROR;
+      u_strFromUTF8(result, cap, &result_len, pv, len, &status);
+    }
+
+    if (U_SUCCESS(status)) {
+      *lenp = result_len;
+
+      return result;
+    }
+    else {
+      croak("Error converting utf8 to utf16: %d");
+    }
+  }
+  else {
+    UChar *result = malloc_temp(aTHX_ sizeof(UChar) * (len + 1));
+    ssize_t i;
+    for (i = 0; i < len; ++i)
+      result[i] = (unsigned char)pv[i];
+    result[len] = 0;
+    *lenp = len;
+
+    return result;
+  }
+}
+
 MODULE = Unicode::ICU::Collator  PACKAGE = Unicode::ICU::Collator PREFIX = ucol_
 
 PROTOTYPES: DISABLE
@@ -167,6 +221,45 @@ cmp(col, sv1, sv2)
 	if (!U_SUCCESS(status)) {
 	    croak("Error comparing: %d", (int)status);
 	}
+    OUTPUT:
+	RETVAL
+
+SV *
+ucol_getSortKey(col, sv)
+	Unicode::ICU::Collator col
+	SV *sv
+    PREINIT:
+	/* freed by FREETMPS */
+        UChar *u16text;
+	STRLEN len;
+        size_t alloc;
+	SV *result_sv;
+	uint8_t *result;
+	int32_t rlen;
+    CODE:
+	u16text = make_uchar(aTHX_ sv, &len);
+	/* give it a bit of space, historically the end of buffer
+	   handling has been pretty bad */
+	alloc = len * 4 + 10;
+	result_sv = newSV(alloc);
+	result = (uint8_t*)SvPVX(result_sv);
+	rlen = ucol_getSortKey(col, u16text, len, result, alloc);
+	if (rlen == 0)
+  	    croak("Internal error in ucol_getSortKey");
+	/* fuzzy check due to the buffer length issue */
+	if (rlen > SvLEN(result_sv) - 5) {
+	  int32_t new_len = rlen + 10;
+	  /* expand the buffer and try again */
+	  SvGROW(result_sv, new_len);
+	  result = (uint8_t*)SvPVX(result_sv);
+	  rlen = ucol_getSortKey(col, u16text, len, result, new_len);
+	}
+	/* the result length includes the trailing NUL */
+        SvCUR_set(result_sv, rlen-1);
+	/* which means this probably isn't needed, but I'm paranoid */
+	*SvEND(result_sv) = '\0';
+	SvPOK_only(result_sv);
+	RETVAL = result_sv;
     OUTPUT:
 	RETVAL
 
