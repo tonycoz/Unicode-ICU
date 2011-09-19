@@ -281,7 +281,7 @@ ucol_getLocale(col, type = ULOC_ACTUAL_LOCALE)
        }
 
 void
-available(...)
+ucol_available(...)
     PREINIT:
 	int32_t count;
         int32_t i;
