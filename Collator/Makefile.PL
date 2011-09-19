@@ -15,10 +15,10 @@ my @define;
 my @inc;
 for my $flag (shellwords $cflags) {
   if ($flag =~ /^-I/) {
-    push @define, $flag;
+    push @inc, $flag;
   }
   else {
-    push @inc, $flag;
+    push @define, $flag;
   }
 }
 
