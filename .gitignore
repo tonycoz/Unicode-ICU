@@ -1,0 +1,11 @@
+*/blib/*
+const-xs.inc
+const-c.inc
+*~
+*.cs
+*.o
+*.old
+pm_to_blib
+Collator/Collator.c
+*.bs
+Makefile
