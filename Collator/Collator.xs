@@ -100,8 +100,8 @@ byte_setState(UCharIterator *i, uint32_t state, UErrorCode *status) {
   }
 }
 
-/* hacky */
-void
+/* Character iterator for byte strings */
+static void
 uiter_setByteString(UCharIterator *c, char const *src, size_t len) {
   c->context = src;
   c->length = len;
