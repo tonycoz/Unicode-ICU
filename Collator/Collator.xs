@@ -176,6 +176,33 @@ make_uchar(pTHX_ SV *sv, STRLEN *lenp) {
   }
 }
 
+static UCollationResult
+ucol_cmp(pTHX_ UCollator *col, SV *sv1, SV *sv2) {
+  UCharIterator c1, c2;
+  const char *s1, *s2;
+  STRLEN len1, len2;
+  UErrorCode status = U_ZERO_ERROR;
+  UCollationResult result;
+
+  s1 = SvPV(sv1, len1);
+  s2 = SvPV(sv2, len2);
+  if (SvUTF8(sv1))
+    uiter_setUTF8(&c1, s1, len1);
+  else
+    uiter_setByteString(&c1, s1, len1);
+  if (SvUTF8(sv2))
+    uiter_setUTF8(&c2, s2, len2);
+  else
+    uiter_setByteString(&c2, s2, len2);
+  result = ucol_strcollIter(col, &c1, &c2, &status);
+
+  if (!U_SUCCESS(status)) {
+    croak("Error comparing: %d", (int)status);
+  }
+
+  return result;
+}
+
 MODULE = Unicode::ICU::Collator  PACKAGE = Unicode::ICU::Collator PREFIX = ucol_
 
 PROTOTYPES: DISABLE
@@ -200,30 +227,12 @@ ucol_DESTROY(col)
 	ucol_close(col);
 
 int
-cmp(col, sv1, sv2)
+ucol_cmp(col, sv1, sv2)
 	Unicode::ICU::Collator col
 	SV *sv1
 	SV *sv2
-    PREINIT:
-        UCharIterator c1, c2;
-        const char *s1, *s2;
-        STRLEN len1, len2;
-	UErrorCode status = U_ZERO_ERROR;
     CODE:
-        s1 = SvPV(sv1, len1);
-        s2 = SvPV(sv2, len2);
-        if (SvUTF8(sv1))
-          uiter_setUTF8(&c1, s1, len1);
-        else
-	  uiter_setByteString(&c1, s1, len1);
-        if (SvUTF8(sv2))
-          uiter_setUTF8(&c2, s2, len2);
-        else
-	  uiter_setByteString(&c2, s2, len2);
-	RETVAL = ucol_strcollIter(col, &c1, &c2, &status);
-	if (!U_SUCCESS(status)) {
-	    croak("Error comparing: %d", (int)status);
-	}
+        RETVAL = ucol_cmp(aTHX_ col, sv1, sv2);
     OUTPUT:
 	RETVAL
 
