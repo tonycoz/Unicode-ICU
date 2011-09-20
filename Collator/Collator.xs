@@ -424,12 +424,37 @@ ucol_getRules(col, rule_option = UCOL_FULL_RULES)
     CODE:
         /* preflight to get the size */
 	len = ucol_getRulesEx(col, rule_option, NULL, 0);
-	work_sv = sv_2mortal(newSV((len + 1) * sizeof(UChar)));
-	work = (UChar *)SvPVX(work_sv);
-	ucol_getRulesEx(col, rule_option, work, len+1);
-	RETVAL = from_uchar(work, len);
+        if (len) {
+	  work_sv = sv_2mortal(newSV((len + 1) * sizeof(UChar)));
+	  work = (UChar *)SvPVX(work_sv);
+	  ucol_getRulesEx(col, rule_option, work, len+1);
+	  RETVAL = from_uchar(work, len);
+	}
+	else {
+	  /* no rules */
+	  RETVAL = newSVpvn("", 0);
+	}
     OUTPUT:
         RETVAL
+
+const char *
+ucol_getVersion(col)
+	Unicode::ICU::Collator col
+    ALIAS:
+        getVersion = 1
+        getUCAVersion = 2
+    PREINIT:
+        char ver_str[U_MAX_VERSION_STRING_LENGTH];
+        UVersionInfo ver;
+    CODE:
+	if (ix == 1)
+	  ucol_getVersion(col, ver);
+ 	else
+	  ucol_getUCAVersion(col, ver);
+	u_versionToString(ver, ver_str);
+        RETVAL = ver_str;
+    OUTPUT:
+	RETVAL
 
 SV *
 ucol_getDisplayName(class, locale, disp_loc)
