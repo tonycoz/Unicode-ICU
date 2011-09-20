@@ -176,6 +176,39 @@ make_uchar(pTHX_ SV *sv, STRLEN *lenp) {
   }
 }
 
+/*
+
+Convert a UChar * native ICU string into an SV.
+
+Currently this always returns a string with UTF8 on, but that may change.
+
+*/
+
+static SV *
+from_uchar(aTHX_ const UChar *src, int32_t len) {
+  /* rough guess */
+  STRLEN bytes = len * 2;
+  SV *result = newSV(bytes);
+  UErrorCode status = U_ZERO_ERROR;
+  int32_t result_len = 0;
+
+  u_strToUTF8(SvPVX(result), SvLEN(result), &result_len, src, len, &status);
+  if (status == U_BUFFER_OVERFLOW_ERROR
+      || result_len >= SvLEN(result)) {
+    /* overflow of some sort, expand it */
+    SvGROW(result, result_len + 10);
+    status = U_ZERO_ERROR;
+    u_strToUTF8(SvPVX(result), SvLEN(result), &result_len, src, len, &status);
+  }
+
+  SvCUR_set(result, result_len);
+  SvPOK_only(result);
+  *SvEND(result) = '\0';
+  SvUTF8_on(result);
+
+  return result;
+}
+
 static UCollationResult
 ucol_cmp(pTHX_ UCollator *col, SV *sv1, SV *sv2) {
   UCharIterator c1, c2;
