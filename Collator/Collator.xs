@@ -413,6 +413,48 @@ ucol_getAttribute(col, attr)
 	RETVAL
 
 
+SV *
+ucol_getRules(col, rule_option = UCOL_FULL_RULES)
+	Unicode::ICU::Collator col
+        int rule_option;
+    PREINIT:
+        SV *work_sv;
+	UChar *work;
+        int32_t len;
+    CODE:
+        /* preflight to get the size */
+	len = ucol_getRulesEx(col, rule_option, NULL, 0);
+	work_sv = sv_2mortal(newSV((len + 1) * sizeof(UChar)));
+	work = (UChar *)SvPVX(work_sv);
+	ucol_getRulesEx(col, rule_option, work, len+1);
+	RETVAL = from_uchar(work, len);
+    OUTPUT:
+        RETVAL
+
+SV *
+ucol_getDisplayName(class, locale, disp_loc)
+	const char *locale;
+	const char *disp_loc;
+    PREINIT:
+        SV *work_sv;
+	UChar *work;
+        int32_t len;
+	UErrorCode status = U_ZERO_ERROR;
+	char temp[1];
+    CODE:
+        /* preflight to get the size */
+	len = ucol_getDisplayName(locale, disp_loc, NULL, 0, &status);
+	if(status != U_BUFFER_OVERFLOW_ERROR){
+	  croak("Unexpected getDisplayName result: %d", (int)status);
+	}
+	work_sv = sv_2mortal(newSV((len + 1) * sizeof(UChar)));
+	work = (UChar *)SvPVX(work_sv);
+	status = U_ZERO_ERROR;
+	ucol_getDisplayName(locale, disp_loc, work, len+1, &status);
+	RETVAL = from_uchar(work, len);
+    OUTPUT:
+        RETVAL
+
 void
 ucol_available(...)
     PREINIT:
