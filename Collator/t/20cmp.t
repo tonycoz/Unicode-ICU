@@ -1,6 +1,6 @@
 #!perl -w
 use strict;
-use Test::More tests => 21;
+use Test::More tests => 23;
 
 use Unicode::ICU::Collator qw(:constants);
 
@@ -69,8 +69,12 @@ my $a_over_under = "a\x{030A}\x{0325}";
   print "# ", unpack("H*", $m_tilde_key), "\n";
   cmp_ok($L_bar_key, 'lt', $m_tilde_key, "make sure they compare ok");
 
+  is($col->getAttribute(UCOL_NORMALIZATION_MODE()), UCOL_OFF(),
+     "Normalization is off by default");
   $col->setAttribute(UCOL_NORMALIZATION_MODE(), UCOL_ON());
-  
+  is($col->getAttribute(UCOL_NORMALIZATION_MODE()), UCOL_ON(),
+     "now it's on");
+
   my $over_under_key = $col->getSortKey($a_over_under);
   ok($over_under_key, "got key for over under");
   print "# ", unpack("H*", $over_under_key), "\n";

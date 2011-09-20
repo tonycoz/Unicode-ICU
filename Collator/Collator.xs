@@ -297,6 +297,20 @@ ucol_setAttribute(col, attr, value)
 	if (!U_SUCCESS(status))
 	    croak("Error setting attribute: %d", (int)status);
 
+int
+ucol_getAttribute(col, attr)
+	Unicode::ICU::Collator col
+	int attr
+    PREINIT:
+	UErrorCode status = U_ZERO_ERROR;
+    CODE:
+	RETVAL = ucol_getAttribute(col, attr, &status);
+	if (!U_SUCCESS(status))
+	    croak("Error setting attribute: %d", (int)status);
+    OUTPUT:
+	RETVAL
+
+
 void
 ucol_available(...)
     PREINIT:
