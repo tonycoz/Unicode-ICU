@@ -236,6 +236,66 @@ ucol_cmp(col, sv1, sv2)
     OUTPUT:
 	RETVAL
 
+bool
+ucol_eq(col, sv1, sv2)
+	Unicode::ICU::Collator col
+	SV *sv1
+	SV *sv2
+    CODE:
+        RETVAL = ucol_cmp(aTHX_ col, sv1, sv2) == UCOL_EQUAL;
+    OUTPUT:
+	RETVAL
+
+bool
+ucol_ne(col, sv1, sv2)
+	Unicode::ICU::Collator col
+	SV *sv1
+	SV *sv2
+    CODE:
+        RETVAL = ucol_cmp(aTHX_ col, sv1, sv2) != UCOL_EQUAL;
+    OUTPUT:
+	RETVAL
+
+bool
+ucol_gt(col, sv1, sv2)
+	Unicode::ICU::Collator col
+	SV *sv1
+	SV *sv2
+    CODE:
+        RETVAL = ucol_cmp(aTHX_ col, sv1, sv2) == UCOL_GREATER;
+    OUTPUT:
+	RETVAL
+
+bool
+ucol_lt(col, sv1, sv2)
+	Unicode::ICU::Collator col
+	SV *sv1
+	SV *sv2
+    CODE:
+        RETVAL = ucol_cmp(aTHX_ col, sv1, sv2) == UCOL_LESS;
+    OUTPUT:
+	RETVAL
+
+bool
+ucol_ge(col, sv1, sv2)
+	Unicode::ICU::Collator col
+	SV *sv1
+	SV *sv2
+    CODE:
+        RETVAL = ucol_cmp(aTHX_ col, sv1, sv2) != UCOL_LESS;
+    OUTPUT:
+	RETVAL
+
+bool
+ucol_le(col, sv1, sv2)
+	Unicode::ICU::Collator col
+	SV *sv1
+	SV *sv2
+    CODE:
+        RETVAL = ucol_cmp(aTHX_ col, sv1, sv2) != UCOL_GREATER;
+    OUTPUT:
+	RETVAL
+
 SV *
 ucol_getSortKey(col, sv)
 	Unicode::ICU::Collator col
