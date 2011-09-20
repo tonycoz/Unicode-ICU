@@ -134,20 +134,23 @@ make_uchar(pTHX_ SV *sv, STRLEN *lenp) {
 
   if (SvUTF8(sv)) {
     /* room for the characters and a bit for UTF-16 */
-    int32_t cap = sv_len_utf8(sv) * 10 / 8 + 5;
-    SV *result_sv = sv_2mortal(newSV(sizeof(UChar) * cap));
-    UChar *result = (UChar *)SvPVX(sv);
+    STRLEN src_chars = sv_len_utf8(sv);
+    int32_t cap = src_chars * 5 / 4 + 10;
+    size_t size = sizeof(UChar) * cap;
+    SV *result_sv = sv_2mortal(newSV(size));
+    UChar *result = (UChar *)SvPVX(result_sv);
     int32_t result_len;
     UErrorCode status = U_ZERO_ERROR;
 
     u_strFromUTF8(result, cap, &result_len, pv, len, &status);
 
-    if (status == U_BUFFER_OVERFLOW_ERROR) {
-      fprintf(stderr, "making more room cap %d rlen %d\n", (int)cap, (int)result_len);
+    if (status == U_BUFFER_OVERFLOW_ERROR
+	|| result_len >= cap) {
       /* need more room, repeat */
+      /* ideally this doesn't happen much */
       cap = result_len + 10;
       SvGROW(result_sv, sizeof(UChar) * cap);
-      result = (UChar *)SvPVX(sv);
+      result = (UChar *)SvPVX(result_sv);
       status = U_ZERO_ERROR;
       u_strFromUTF8(result, cap, &result_len, pv, len, &status);
     }
@@ -158,7 +161,7 @@ make_uchar(pTHX_ SV *sv, STRLEN *lenp) {
       return result;
     }
     else {
-      croak("Error converting utf8 to utf16: %d");
+      croak("Error converting utf8 to utf16: %d", status);
     }
   }
   else {
@@ -238,20 +241,22 @@ ucol_getSortKey(col, sv)
 	int32_t rlen;
     CODE:
 	u16text = make_uchar(aTHX_ sv, &len);
-	/* give it a bit of space, historically the end of buffer
-	   handling has been pretty bad */
-	alloc = len * 4 + 10;
+	alloc = len * 3 + 2;
 	result_sv = newSV(alloc);
 	result = (uint8_t*)SvPVX(result_sv);
+	/* sometimes it allocates a bit more */
+	alloc = SvLEN(result_sv);
 	rlen = ucol_getSortKey(col, u16text, len, result, alloc);
 	if (rlen == 0)
   	    croak("Internal error in ucol_getSortKey");
-	/* fuzzy check due to the buffer length issue */
-	if (rlen > SvLEN(result_sv) - 5) {
+
+	if (rlen > SvLEN(result_sv)) {
+	  /* ideally we don't execute this often */
 	  int32_t new_len = rlen + 10;
 	  /* expand the buffer and try again */
 	  SvGROW(result_sv, new_len);
 	  result = (uint8_t*)SvPVX(result_sv);
+	  new_len = SvLEN(result_sv);
 	  rlen = ucol_getSortKey(col, u16text, len, result, new_len);
 	}
 	/* the result length includes the trailing NUL */

@@ -1,6 +1,6 @@
 #!perl -w
 use strict;
-use Test::More tests => 19;
+use Test::More tests => 21;
 
 use Unicode::ICU::Collator qw(:constants);
 
@@ -68,6 +68,8 @@ my $a_over_under = "a\x{030A}\x{0325}";
   ok($m_tilde_key, "made m_mid_tilde_key");
   print "# ", unpack("H*", $m_tilde_key), "\n";
   cmp_ok($L_bar_key, 'lt', $m_tilde_key, "make sure they compare ok");
+
+  $col->setAttribute(UCOL_NORMALIZATION_MODE(), UCOL_ON());
   
   my $over_under_key = $col->getSortKey($a_over_under);
   ok($over_under_key, "got key for over under");
@@ -76,6 +78,14 @@ my $a_over_under = "a\x{030A}\x{0325}";
   ok($under_over_key, "got key for under over");
   print "# ", unpack("H*", $under_over_key), "\n";
   is($over_under_key, $under_over_key, "they should be the same");
+
+  is($col->cmp($a_under_over, $a_over_under), 0,
+     "changed mark order should be equal");
+
+  my $m_tilde_many = $m_mid_tilde x 1000;
+  my $m_tilde_many_key = $col->getSortKey($m_tilde_many);
+  ok($m_tilde_many_key, "try a long sort key");
+  print "# long key length: ", length $m_tilde_many_key, "\n";
 }
 
 { # the same with getSortKey

@@ -33,6 +33,13 @@ BEGIN {
   our @EXPORT_OK = map @$_, values %EXPORT_TAGS;
 }
 
+sub sort {
+  my $self = shift;
+  return map $_->[1],
+    sort { $a->[0] cmp $b->[0] }
+      map [ $self->getSortKey($_), $_ ], @_;
+}
+
 sub CLONE_SKIP { 1 }
 
 sub AUTOLOAD {
