@@ -10,3 +10,8 @@ Collator/Collator.c
 *.bs
 Makefile
 MYMETA.yml
+*.gcov
+*.gcda
+*.gcno
+Collator/Unicode-ICU-Collator-*
+*.bak

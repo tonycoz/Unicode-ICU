@@ -1,6 +1,6 @@
 #!perl -w
 use strict;
-use Test::More tests => 23;
+use Test::More tests => 50;
 
 use Unicode::ICU::Collator qw(:constants);
 
@@ -100,4 +100,59 @@ my $a_over_under = "a\x{030A}\x{0325}";
     sort { $a->[0] cmp $b->[0] }
       map [ $col->getSortKey($_), $_ ], @names;
   is_deeply(\@sorted, \@sorted_names, "check sorted names (getSortKey)");
+}
+
+{ # get rules
+  {
+    my $col = Unicode::ICU::Collator->new("root");
+    ok($col, "make root collator");
+    my $rules = $col->getRules;
+    isnt($rules, "", "all collators have rules");
+    ok(utf8::is_utf8($rules), "default rules should be utf8");
+    is($col->getRules(UCOL_TAILORING_ONLY), "",
+       "root locale has no tailoring");
+  }
+  {
+    my $col = Unicode::ICU::Collator->new("de__phonebook");
+    ok($col, "make german phonebook collator");
+    my $tailor = $col->getRules(UCOL_TAILORING_ONLY);
+    isnt($tailor, "", "de phonebook locale has tailoring");
+    ok(utf8::is_utf8($tailor), "de tailoring should have utf8 on");
+  }
+}
+
+{ # versions
+  my $col = Unicode::ICU::Collator->new("en");
+  my $ver_qr = qr/\A[0-9]+(\.[0-9]+)+\z/;
+
+  my $ver = $col->getVersion;
+  ok($ver, "have a version");
+  like($ver, $ver_qr, "right format");
+
+  my $uca_ver = $col->getUCAVersion;
+  ok($uca_ver, "have a UCA version");
+  like($uca_ver, $ver_qr, "right format");
+}
+
+{ # our various operators
+  my $col = Unicode::ICU::Collator->new("en");
+  print "# ", $col->getAttribute(UCOL_CASE_FIRST), "\n";
+  # ignore case differences
+  $col->setAttribute(UCOL_STRENGTH(), UCOL_SECONDARY());
+  ok($col->eq("Test", "test"), "eq");
+  ok(!$col->eq("Test", "Tast"), "!eq");
+  ok($col->ne("Test", "Tast"), "ne");
+  ok(!$col->ne("Test", "test"), "!ne");
+  ok($col->le("Test", "test"), "le (equal");
+  ok($col->le("tast", "Test"), "le (less)");
+  ok(!$col->le("Test", "tast"), "!le (greater)");
+  ok($col->ge("Test", "test"), "ge (equal)");
+  ok($col->ge("Test", "tast"), "ge (greater)");
+  ok(!$col->ge("tast", "Test"), "!ge (less)");
+  ok($col->lt("tast", "Test"), "lt (less)");
+  ok(!$col->lt("Test", "test"), "!lt (equal)");
+  ok(!$col->lt("Test", "tast"), "!lt (greater)");
+  ok($col->gt("Test", "tast"), "gt (greater)");
+  ok(!$col->gt("Test", "test"), "!gt (equal)");
+  ok(!$col->gt("tast", "Test"), "!gt (less)");
 }

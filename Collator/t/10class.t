@@ -1,6 +1,6 @@
 #!perl -w
 use strict;
-use Test::More tests => 5;
+use Test::More tests => 6;
 
 BEGIN { use_ok("Unicode::ICU::Collator", ":constants") }
 
@@ -15,4 +15,9 @@ BEGIN { use_ok("Unicode::ICU::Collator", ":constants") }
   is(ULOC_ACTUAL_LOCALE, 0, "ULOC_ACTUAL_LOCALE");
   print "# ", ULOC_ACTUAL_LOCALE(), "\n";
   is(ULOC_VALID_LOCALE, 1, "ULOC_VALID_LOCALE");
+}
+
+{
+  is(Unicode::ICU::Collator->getDisplayName("en", "en"), "English",
+     "en is English");
 }

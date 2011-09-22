@@ -7,6 +7,10 @@
 
 typedef UCollator *Unicode__ICU__Collator;
 
+/* iterators require all of these, but most aren't called for our
+ * use-cases */
+
+
 static int32_t
 byte_getIndex(UCharIterator *i, UCharIteratorOrigin origin) {
   switch(origin) {
@@ -185,7 +189,7 @@ Currently this always returns a string with UTF8 on, but that may change.
 */
 
 static SV *
-from_uchar(aTHX_ const UChar *src, int32_t len) {
+from_uchar(pTHX_ const UChar *src, int32_t len) {
   /* rough guess */
   STRLEN bytes = len * 2;
   SV *result = newSV(bytes);
@@ -428,7 +432,7 @@ ucol_getRules(col, rule_option = UCOL_FULL_RULES)
 	  work_sv = sv_2mortal(newSV((len + 1) * sizeof(UChar)));
 	  work = (UChar *)SvPVX(work_sv);
 	  ucol_getRulesEx(col, rule_option, work, len+1);
-	  RETVAL = from_uchar(work, len);
+	  RETVAL = from_uchar(aTHX_ work, len);
 	}
 	else {
 	  /* no rules */
@@ -476,7 +480,7 @@ ucol_getDisplayName(class, locale, disp_loc)
 	work = (UChar *)SvPVX(work_sv);
 	status = U_ZERO_ERROR;
 	ucol_getDisplayName(locale, disp_loc, work, len+1, &status);
-	RETVAL = from_uchar(work, len);
+	RETVAL = from_uchar(aTHX_ work, len);
     OUTPUT:
         RETVAL
 
