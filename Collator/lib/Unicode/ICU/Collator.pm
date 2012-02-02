@@ -70,7 +70,7 @@ __END__
 
 =head1 NAME
 
-Uncode::ICU::Collator - wrapper around ICU collation services
+Unicode::ICU::Collator - wrapper around ICU collation services
 
 =head1 SYNOPSIS
 

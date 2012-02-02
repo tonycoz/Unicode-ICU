@@ -1,3 +1,8 @@
+0.002 - unreleased
+
+ - fix the content of the NAME section, Unicode was spelled incorrectly.
+   https://rt.cpan.org/Ticket/Display.html?id=73960
+
 0.001 - 22 Sep 2011
 
  - initial release
