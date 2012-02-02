@@ -4,9 +4,9 @@ use Text::ParseWords qw(shellwords);
 use ExtUtils::Constant qw(WriteConstants);
 
 my $cflags = `icu-config --cppflags`
-  or die "No icu-config --cppflags found\n";
+  or die "OS unsupported: No icu-config --cppflags found\n";
 my $libs = `icu-config --ldflags`
-  or die "No icu-config libraries\n";
+  or die "OS unsupported: No icu-config libraries\n";
 chomp $cflags;
 chomp $libs;
 

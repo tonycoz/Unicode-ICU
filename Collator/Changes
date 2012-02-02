@@ -3,6 +3,10 @@
  - fix the content of the NAME section, Unicode was spelled incorrectly.
    https://rt.cpan.org/Ticket/Display.html?id=73960
 
+ - adjust failure when we can't find icu-config to indicate an
+   unsupported platform (ie. one without libicu) rather than some
+   generic unknown issue.
+
 0.001 - 22 Sep 2011
 
  - initial release
