@@ -1,4 +1,4 @@
-0.002 - unreleased
+0.002 - 02 Feb 2012
 
  - fix the content of the NAME section, Unicode was spelled incorrectly.
    https://rt.cpan.org/Ticket/Display.html?id=73960
