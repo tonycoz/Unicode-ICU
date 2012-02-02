@@ -1,3 +1,4 @@
+use 5.008008;
 use strict;
 use ExtUtils::MakeMaker;
 use Text::ParseWords qw(shellwords);
@@ -33,6 +34,11 @@ my %opts =
    DEFINE => "@define",
    INC => "@inc",
    LIBS => $libs,
+   PREREQ_PM =>
+   {
+    'Test::More' => '0.47',
+    XSLoader => 0,
+   },
   );
 my $eu_mmv = eval $ExtUtils::MakeMaker::VERSION;
 if ($eu_mmv > 6.06) {
