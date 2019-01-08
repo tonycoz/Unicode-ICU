@@ -15,3 +15,5 @@ MYMETA.yml
 *.gcno
 Collator/Unicode-ICU-Collator-*
 *.bak
+MYMETA.yml
+MYMETA.json
