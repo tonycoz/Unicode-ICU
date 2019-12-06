@@ -1,3 +1,5 @@
+0.004 - 06 Dec 2019
+
  - use pkg-config to probe the ICU headers/libraries, only use
    icu-config if that fails. (cpan #86373)
 
