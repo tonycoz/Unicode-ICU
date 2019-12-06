@@ -4,10 +4,16 @@ use ExtUtils::MakeMaker;
 use Text::ParseWords qw(shellwords);
 use ExtUtils::Constant qw(WriteConstants);
 
-my $cflags = `icu-config --cppflags`
-  or die "OS unsupported: No icu-config --cppflags found\n";
-my $libs = `icu-config --ldflags`
-  or die "OS unsupported: No icu-config libraries\n";
+my $cflags = `pkg-config --cflags icu-i18n`;
+my $libs = `pkg-config --libs icu-i18n`;
+
+unless ($cflags) {
+  print "Pkg-config didn't find icu-i18n, falling back to icu-config\n";
+  $cflags = `icu-config --cppflags`
+    or die "OS unsupported: No icu-config --cppflags found\n";
+  $libs = `icu-config --ldflags`
+    or die "OS unsupported: No icu-config libraries\n";
+}
 chomp $cflags;
 chomp $libs;
 
