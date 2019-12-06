@@ -47,12 +47,36 @@ my %opts =
    },
   );
 my $eu_mmv = eval $ExtUtils::MakeMaker::VERSION;
-if ($eu_mmv > 6.06) {
+if (eval { ExtUtils::MakeMaker->VERSION('6.06'); 1 }) {
   $opts{AUTHOR} = 'Tony Cook <tonyc@cpan.org>';
   $opts{ABSTRACT} = 'Wrapper around ICU collation services';
 }
-if ($eu_mmv > 6.30) {
-  $opts{LICENSE} = 'perl';
+if (eval { ExtUtils::MakeMaker->VERSION('6.30'); 1 }) {
+  $opts{LICENSE} = 'perl_5';
+}
+
+if (eval { ExtUtils::MakeMaker->VERSION('6.46'); 1 }) {
+  $opts{META_MERGE} =
+    {
+      'meta-spec' =>
+	{
+	  version => "2",
+	  url => "https://metacpan.org/pod/CPAN::Meta::Spec",
+	},
+      resources =>
+	{
+	  repository =>
+	    {
+	      url => "https://github.com/tonycoz/Unicode-ICU.git",
+	      web => "https://github.com/tonycoz/Unicode-ICU",
+	      type => "git",
+	    },
+	  bugtracker =>
+	    {
+	      web => "https://github.com/tonycoz/Unicode-ICU/issues",
+	    },
+	},
+    };
 }
 
 WriteMakefile(%opts);
