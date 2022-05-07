@@ -2,6 +2,10 @@
    including the correct header.
    https://github.com/tonycoz/Unicode-ICU/pull/3
 
+ - improved (I hope) metadata
+
+ - add github workflows for testing on linux and macos
+
 0.004 - 06 Dec 2019
 
  - use pkg-config to probe the ICU headers/libraries, only use
