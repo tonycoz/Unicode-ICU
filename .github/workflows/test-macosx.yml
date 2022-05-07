@@ -1,0 +1,32 @@
+name: test-macosx
+
+on:
+  push:
+    branches:
+      - '**'
+    tags-ignore:
+      - '*'
+  pull_request:
+
+jobs:
+  unicode-icu:
+    runs-on: macos-latest
+    timeout-minutes: 15
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: install dependencies
+        run: |
+            brew update ||:
+            brew install perl icu4c
+      - name: configure
+        run: |
+            # brew doesn't seem to set this correctly (or maybe its the formula)
+            export PKG_CONFIG_PATH=`brew --prefix icu4c`/lib/pkgconfig:$PKG_CONFIG_PATH
+            cd Collator && perl Makefile.PL
+      - name: build
+        run: |
+            cd Collator && make
+      - name: test
+        run: |
+            cd Collator && make test
