@@ -1,3 +1,7 @@
+ - fix build on clang, Collator.xs was using an ICU function without
+   including the correct header.
+   https://github.com/tonycoz/Unicode-ICU/pull/3
+
 0.004 - 06 Dec 2019
 
  - use pkg-config to probe the ICU headers/libraries, only use
