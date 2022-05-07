@@ -10,4 +10,5 @@ t/10class.t
 t/20cmp.t
 t/90podcover.t
 t/95pod.t
+t/99mymeta.t
 typemap
